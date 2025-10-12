@@ -1,0 +1,44 @@
+services:
+  db:
+    image: postgres:17
+    container_name: 'dogo-db'
+    restart: always
+    environment:
+      POSTGRES_USER: '${POSTGRES_USER}'
+      POSTGRES_PASSWORD: '${POSTGRES_PASSWORD}'
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT}:5432"
+    volumes:
+      - ./data:/var/lib/postgresql/data:rw
+    networks:
+      - db
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1000m"
+        max-file: "5"
+
+  web:
+    image: facturalas/dogo-core:v-1.0.0
+    container_name: dogo-api
+    command: >
+      sh -c "
+        echo '⏳ Waiting for PostgreSQL to be ready...' &&
+        until nc -z ${POSTGRES_HOST} ${POSTGRES_PORT}; do
+          sleep 1;
+        done;
+        echo '✅ Database is ready, running migrations...' &&
+        python manage.py migrate --noinput &&
+        echo '🚀 Starting Gunicorn...' &&
+        gunicorn core.wsgi:application --bind 0.0.0.0:8000
+      "
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+networks:
+  db: {}
+
