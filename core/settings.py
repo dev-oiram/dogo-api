@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-+*fkxd0(ga@rf_c5h3_t%gk-4+p1#z^x5+6@+y!36q9k#r@_%7
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['dogo-api']
 
 
 # Application definition
